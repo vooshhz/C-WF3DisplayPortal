@@ -780,77 +780,129 @@
         });
       }
 
+      // Update loading message
+      function updateLoadingMessage(msg) {
+        const loadingState = document.getElementById('loadingState');
+        if (loadingState) {
+          loadingState.querySelector('p').textContent = msg;
+        }
+        console.log(msg);
+      }
+
       // Initialize Firebase and load data
       async function init() {
         try {
-          console.log('Starting initialization...');
+          updateLoadingMessage('Waiting for Firebase...');
 
-          // Wait for Firebase to initialize with timeout
+          // Wait for Firebase to be ready
           await new Promise((resolve, reject) => {
-            let attempts = 0;
-            const maxAttempts = 50; // 5 seconds timeout
+            const timeout = setTimeout(() => {
+              reject(new Error('Firebase timeout - make sure you are running via "firebase serve" or deployed to Firebase Hosting'));
+            }, 10000);
 
-            const checkFirebase = setInterval(() => {
-              attempts++;
-              console.log(`Checking Firebase... attempt ${attempts}`);
-
-              if (typeof firebase !== 'undefined') {
-                console.log('Firebase object found');
-                console.log('Firebase apps:', firebase.apps ? firebase.apps.length : 'undefined');
-
-                if (firebase.apps && firebase.apps.length > 0) {
-                  clearInterval(checkFirebase);
-                  resolve();
-                }
+            const check = () => {
+              if (typeof firebase !== 'undefined' && firebase.database) {
+                clearTimeout(timeout);
+                resolve();
+              } else {
+                setTimeout(check, 100);
               }
-
-              if (attempts >= maxAttempts) {
-                clearInterval(checkFirebase);
-                reject(new Error('Firebase initialization timeout'));
-              }
-            }, 100);
+            };
+            check();
           });
 
-          console.log('Firebase initialized successfully');
+          updateLoadingMessage('Loading quest database...');
 
           // Load quest database JSON
           const response = await fetch('quest_dashboard.json');
+          if (!response.ok) {
+            throw new Error(`Failed to load quest_dashboard.json: ${response.status}`);
+          }
           questDatabase = await response.json();
           console.log('Quest database loaded:', Object.keys(questDatabase).length, 'quests');
+
+          updateLoadingMessage('Fetching completed quests from Firebase...');
 
           // Get reference to the quests node
           const db = firebase.database();
           const path = `users/${CONFIG.userId}/characters/${CONFIG.characterId}/quests`;
-          console.log('Fetching from path:', path);
+          console.log('Database path:', path);
 
+          // First, let's verify the database connection by checking root
+          const testRef = db.ref('/');
+          const testSnap = await testRef.once('value');
+          console.log('Database root exists:', testSnap.exists());
+          console.log('Database root keys:', testSnap.val() ? Object.keys(testSnap.val()) : 'null');
+
+          // Now fetch the actual path
           const questsRef = db.ref(path);
-
-          // Fetch all scenes
-          console.log('Executing database query...');
           const snapshot = await questsRef.once('value');
-          console.log('Snapshot received:', snapshot.exists());
+
+          console.log('Snapshot exists:', snapshot.exists());
+          console.log('Snapshot key:', snapshot.key);
           const scenesData = snapshot.val();
-          console.log('Raw data:', scenesData);
+
+          // Detailed debug logging
+          console.log('=== DEBUG: scenesData ===');
+          console.log('Raw scenesData:', scenesData);
+          console.log('Type:', typeof scenesData);
+          console.log('Is null:', scenesData === null);
+          console.log('Is undefined:', scenesData === undefined);
+
+          if (scenesData) {
+            const sceneKeys = Object.keys(scenesData);
+            console.log('Scene names found:', sceneKeys);
+            console.log('Number of scenes:', sceneKeys.length);
+
+            sceneKeys.forEach(sceneName => {
+              const sceneData = scenesData[sceneName];
+              console.log(`--- Scene: ${sceneName} ---`);
+              console.log('  Scene data:', sceneData);
+              console.log('  Has CompletedQuests:', sceneData && 'CompletedQuests' in sceneData);
+
+              if (sceneData && sceneData.CompletedQuests) {
+                const questIds = Object.values(sceneData.CompletedQuests);
+                console.log('  Quest IDs (values):', questIds);
+                console.log('  Number of quests:', questIds.length);
+              }
+            });
+          }
+          console.log('=== END DEBUG ===');
 
           if (!scenesData) {
-            console.log('No quest data found');
-            renderQuests([]);
+            console.log('No quest data found at path');
+            document.getElementById('questEntries').innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h3>No Data Found</h3>
+                <p>Path: <code style="background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:0.8rem;">${path}</code></p>
+                <p style="margin-top:1rem;font-size:0.9rem;">Possible causes:</p>
+                <ul style="text-align:left;max-width:400px;margin:1rem auto;font-size:0.85rem;color:#636e72;">
+                  <li>Database rules require authentication</li>
+                  <li>Path doesn't exist in database</li>
+                  <li>User/Character ID is incorrect</li>
+                </ul>
+              </div>
+            `;
             return;
           }
 
-          console.log('Scenes found:', Object.keys(scenesData));
-
           // Loop through each scene and get completed quests
           allCompletedQuests = [];
+          const sceneNames = Object.keys(scenesData);
+          console.log('Found scenes:', sceneNames);
 
-          for (const sceneName in scenesData) {
+          for (const sceneName of sceneNames) {
             const sceneData = scenesData[sceneName];
+            console.log(`Processing scene: ${sceneName}`, sceneData);
 
             if (sceneData && sceneData.CompletedQuests) {
               const completedQuests = sceneData.CompletedQuests;
+              // CompletedQuests is an array where VALUES contain quest ID strings
+              const questIds = Object.values(completedQuests);
+              console.log(`  Found ${questIds.length} completed quests:`, questIds);
 
-              for (const questId in completedQuests) {
-                // Look up quest in our database
+              for (const questId of questIds) {
                 if (questDatabase[questId]) {
                   allCompletedQuests.push({
                     questId: questId,
@@ -858,22 +910,23 @@
                     data: questDatabase[questId]
                   });
                 } else {
-                  console.warn(`Quest not found in database: ${questId}`);
+                  console.warn(`  Quest "${questId}" not found in quest_dashboard.json`);
                 }
               }
             }
           }
 
-          console.log('Total completed quests:', allCompletedQuests.length);
+          console.log('Total completed quests found:', allCompletedQuests.length);
           renderQuests(allCompletedQuests);
 
         } catch (error) {
-          console.error('Error loading data:', error);
+          console.error('Error:', error);
           document.getElementById('questEntries').innerHTML = `
             <div class="empty-state">
               <div class="empty-state-icon">⚠️</div>
               <h3>Error Loading Data</h3>
               <p>${error.message}</p>
+              <p style="margin-top: 1rem; font-size: 0.8rem; color: #999;">Check browser console for details</p>
             </div>
           `;
         }
