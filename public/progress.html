@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Progress - Willow Fable 3 Parent Portal</title>
+
+    <!-- Firebase SDK -->
+    <script defer src="/__/firebase/12.6.0/firebase-app-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-auth-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-database-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-firestore-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-functions-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-storage-compat.js"></script>
+    <script defer src="/__/firebase/12.6.0/firebase-analytics-compat.js"></script>
+    <script defer src="/__/firebase/init.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: linear-gradient(135deg, #e8f5e9 0%, #fff8e1 100%);
+        min-height: 100vh;
+        color: #2d3436;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Navigation */
+      .navbar {
+        background: linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%);
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        height: 70px;
+      }
+
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+
+      .nav-logo {
+        width: 45px;
+        height: 45px;
+        background: #ffa726;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .nav-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .nav-subtitle {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
+      .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      .btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-login {
+        background: white;
+        color: #4a7c59;
+      }
+
+      .btn-login:hover {
+        background: #fff8e1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      /* Page Header */
+      .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .page-header-text h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2d3436;
+        margin-bottom: 0.25rem;
+      }
+
+      .page-header-text p {
+        color: #636e72;
+        font-size: 1rem;
+      }
+
+      /* Stats Summary */
+      .stats-summary {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .stat-badge {
+        background: white;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .stat-badge-icon {
+        font-size: 1.25rem;
+      }
+
+      .stat-badge-value {
+        font-weight: 800;
+        color: #2d3436;
+      }
+
+      .stat-badge-label {
+        color: #636e72;
+        font-size: 0.85rem;
+      }
+
+      /* Filter Bar */
+      .filter-bar {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .filter-label {
+        font-weight: 700;
+        color: #2d3436;
+      }
+
+      .filter-chips {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .filter-chip {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background: #f0f0f0;
+        color: #636e72;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .filter-chip:hover {
+        background: #e8f5e9;
+        color: #4a7c59;
+      }
+
+      .filter-chip.active {
+        background: linear-gradient(135deg, #4a7c59 0%, #2d5a3d 100%);
+        color: white;
+      }
+
+      /* Quest Entries */
+      .quest-entries {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .quest-entry {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+        transition: all 0.3s ease;
+      }
+
+      .quest-entry:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .quest-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+      }
+
+      .quest-icon.math { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+      .quest-icon.reading { background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 100%); }
+      .quest-icon.science { background: linear-gradient(135deg, #ffd93d 0%, #ffa726 100%); }
+      .quest-icon.social { background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); }
+      .quest-icon.art { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+
+      .quest-details {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .quest-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #2d3436;
+        line-height: 1.2;
+      }
+
+      .quest-capability {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e9 100%);
+        border-left: 4px solid #4a7c59;
+        padding: 1rem 1.25rem;
+        border-radius: 0 12px 12px 0;
+      }
+
+      .capability-label {
+        display: block;
+        font-weight: 700;
+        color: #4a7c59;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+      }
+
+      .capability-text {
+        color: #2d3436;
+        font-size: 1rem;
+        line-height: 1.6;
+        font-weight: 500;
+      }
+
+      .quest-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .completion-date {
+        color: #b2bec3;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      /* Curriculum Tag */
+      .curriculum-tag {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+        min-width: 140px;
+      }
+
+      .curriculum-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .curriculum-badge.math {
+        background: #dfe6e9;
+        color: #0984e3;
+        border: 2px solid #74b9ff;
+      }
+
+      .curriculum-badge.reading {
+        background: #e8f5e9;
+        color: #2d5a3d;
+        border: 2px solid #88d8b0;
+      }
+
+      .curriculum-badge.science {
+        background: #fff8e1;
+        color: #e17055;
+        border: 2px solid #ffa726;
+      }
+
+      .curriculum-badge.social {
+        background: #f3e5f5;
+        color: #6c5ce7;
+        border: 2px solid #a29bfe;
+      }
+
+      .curriculum-badge.art {
+        background: #fce4ec;
+        color: #e84393;
+        border: 2px solid #fd79a8;
+      }
+
+      .grade-level {
+        font-size: 0.75rem;
+        color: #636e72;
+        font-weight: 600;
+      }
+
+      .xp-earned {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-weight: 700;
+        color: #ffa726;
+        font-size: 0.9rem;
+      }
+
+      /* Footer */
+      .footer {
+        background: linear-gradient(135deg, #2d5a3d 0%, #1e3c2a 100%);
+        color: white;
+        padding: 3rem 2rem 1.5rem;
+        margin-top: auto;
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+      }
+
+      .footer-section h4 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: #a8e6cf;
+      }
+
+      .footer-section a {
+        display: block;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+      }
+
+      .footer-section a:hover {
+        color: white;
+      }
+
+      .footer-bottom {
+        max-width: 1200px;
+        margin: 2rem auto 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+      }
+
+      /* Loading State */
+      .loading-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #636e72;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e0e0e0;
+        border-top-color: #4a7c59;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+      }
+
+      .empty-state h3 {
+        color: #2d3436;
+        margin-bottom: 0.5rem;
+      }
+
+      .empty-state p {
+        color: #636e72;
+      }
+
+      /* General Skills badge */
+      .curriculum-badge.general {
+        background: #f0f0f0;
+        color: #636e72;
+        border: 2px solid #b2bec3;
+      }
+
+      .quest-icon.general {
+        background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .navbar {
+          padding: 0 1rem;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .page-header-text h1 {
+          font-size: 1.5rem;
+        }
+
+        .stats-summary {
+          width: 100%;
+        }
+
+        .stat-badge {
+          flex: 1;
+          min-width: 120px;
+        }
+
+        .quest-entry {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+
+        .quest-icon {
+          margin: 0 auto;
+        }
+
+        .quest-details {
+          align-items: center;
+        }
+
+        .quest-capability {
+          text-align: center;
+          border-left: none;
+          border-top: 4px solid #4a7c59;
+          border-radius: 0 0 12px 12px;
+        }
+
+        .curriculum-tag {
+          align-items: center;
+          width: 100%;
+        }
+
+        .filter-bar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-logo">🌿</div>
+        <div>
+          <div class="nav-title">Willow Fable 3</div>
+          <div class="nav-subtitle">Parent Portal</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="progress.html" class="nav-link active">Progress</a>
+        <a href="#" class="nav-link">Achievements</a>
+        <a href="#" class="nav-link">Settings</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-login">
+          <span>👤</span> Login
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-text">
+          <h1>Completed Quests</h1>
+          <p>Review your child's learning achievements and curriculum progress</p>
+        </div>
+        <div class="stats-summary">
+          <div class="stat-badge">
+            <span class="stat-badge-icon">🏆</span>
+            <span class="stat-badge-value">12</span>
+            <span class="stat-badge-label">Quests</span>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-badge-icon">⭐</span>
+            <span class="stat-badge-value">2,450</span>
+            <span class="stat-badge-label">Total XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter by Subject:</span>
+        <div class="filter-chips">
+          <button class="filter-chip active">All</button>
+          <button class="filter-chip">Math</button>
+          <button class="filter-chip">Reading</button>
+          <button class="filter-chip">Science</button>
+          <button class="filter-chip">Social Studies</button>
+          <button class="filter-chip">Art</button>
+        </div>
+      </div>
+
+      <!-- Quest Entries - Dynamically populated -->
+      <div class="quest-entries" id="questEntries">
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+          <div class="loading-spinner"></div>
+          <p>Loading quests from database...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>Willow Fable 3</h4>
+          <a href="#">About the Game</a>
+          <a href="#">For Parents</a>
+          <a href="#">Safety Features</a>
+          <a href="#">Educational Benefits</a>
+        </div>
+        <div class="footer-section">
+          <h4>Support</h4>
+          <a href="#">Help Center</a>
+          <a href="#">Contact Us</a>
+          <a href="#">FAQs</a>
+          <a href="#">Community</a>
+        </div>
+        <div class="footer-section">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">COPPA Compliance</a>
+          <a href="#">Cookie Policy</a>
+        </div>
+        <div class="footer-section">
+          <h4>Connect</h4>
+          <a href="#">Newsletter</a>
+          <a href="#">Social Media</a>
+          <a href="#">Blog</a>
+          <a href="#">Updates</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 Willow Fable 3. All rights reserved. Made with 💚 for families.</p>
+      </div>
+    </footer>
+
+    <script>
+      // Configuration - Hardcoded for now
+      const CONFIG = {
+        userId: '9WkYqd0FGZhUE9lg6O9j7K8pa6r1',
+        characterId: '5e395cdd-2e79-4da4-8a1f-2ab4af10fe46'
+      };
+
+      // Global variables
+      let questDatabase = {};
+      let allCompletedQuests = [];
+
+      // Subject to icon mapping
+      const subjectIcons = {
+        'Math': '🧮',
+        'Science': '🔬',
+        'Reading': '📚',
+        'General Skills': '⭐',
+        'Science, Math': '🔬',
+        'default': '📋'
+      };
+
+      // Get CSS class for subject
+      function getSubjectClass(subject) {
+        const subjectLower = subject.toLowerCase();
+        if (subjectLower.includes('math')) return 'math';
+        if (subjectLower.includes('science')) return 'science';
+        if (subjectLower.includes('reading')) return 'reading';
+        if (subjectLower.includes('social')) return 'social';
+        if (subjectLower.includes('art')) return 'art';
+        return 'general';
+      }
+
+      // Get icon for subject
+      function getSubjectIcon(subject) {
+        return subjectIcons[subject] || subjectIcons['default'];
+      }
+
+      // Create quest entry HTML
+      function createQuestEntry(questId, questData, sceneName) {
+        const subjectClass = getSubjectClass(questData.subject);
+        const icon = getSubjectIcon(questData.subject);
+
+        return `
+          <div class="quest-entry" data-subject="${questData.subject}">
+            <div class="quest-icon ${subjectClass}">${icon}</div>
+            <div class="quest-details">
+              <h3 class="quest-name">${questId.replace(/([A-Z])/g, ' $1').replace(/(\d+)/g, ' $1').trim()}</h3>
+              <div class="quest-capability">
+                <span class="capability-label">What They Did</span>
+                <span class="capability-text">${questData.whatPlayerDid}</span>
+              </div>
+              <div class="quest-capability" style="margin-top: 0.5rem; border-left-color: #ffa726;">
+                <span class="capability-label" style="color: #e17055;">Why It Matters</span>
+                <span class="capability-text">${questData.whyItMatters}</span>
+              </div>
+              <div class="quest-meta">
+                <span class="completion-date">Scene: ${sceneName.replace(/_/g, ' ')}</span>
+                <span class="xp-earned">+${questData.points} Points</span>
+              </div>
+            </div>
+            <div class="curriculum-tag">
+              <span class="curriculum-badge ${subjectClass}">${questData.gradeLevel} ${questData.subject}</span>
+              <span class="grade-level">${questData.subjectMatter}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Render quests to page
+      function renderQuests(quests) {
+        const container = document.getElementById('questEntries');
+        const loadingState = document.getElementById('loadingState');
+
+        if (loadingState) {
+          loadingState.remove();
+        }
+
+        if (quests.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🎮</div>
+              <h3>No Completed Quests Yet</h3>
+              <p>Start playing to see progress here!</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Update stats
+        const totalQuests = quests.length;
+        const totalPoints = quests.reduce((sum, q) => sum + (q.data.points || 0), 0);
+
+        document.querySelector('.stat-badge-value').textContent = totalQuests;
+        document.querySelectorAll('.stat-badge-value')[1].textContent = totalPoints.toLocaleString();
+
+        // Render quest entries
+        container.innerHTML = quests.map(q =>
+          createQuestEntry(q.questId, q.data, q.sceneName)
+        ).join('');
+      }
+
+      // Filter quests by subject
+      function filterQuests(subject) {
+        const entries = document.querySelectorAll('.quest-entry');
+        entries.forEach(entry => {
+          if (subject === 'All') {
+            entry.style.display = 'grid';
+          } else {
+            const questSubject = entry.dataset.subject.toLowerCase();
+            if (questSubject.includes(subject.toLowerCase())) {
+              entry.style.display = 'grid';
+            } else {
+              entry.style.display = 'none';
+            }
+          }
+        });
+      }
+
+      // Initialize Firebase and load data
+      async function init() {
+        try {
+          console.log('Starting initialization...');
+
+          // Wait for Firebase to initialize with timeout
+          await new Promise((resolve, reject) => {
+            let attempts = 0;
+            const maxAttempts = 50; // 5 seconds timeout
+
+            const checkFirebase = setInterval(() => {
+              attempts++;
+              console.log(`Checking Firebase... attempt ${attempts}`);
+
+              if (typeof firebase !== 'undefined') {
+                console.log('Firebase object found');
+                console.log('Firebase apps:', firebase.apps ? firebase.apps.length : 'undefined');
+
+                if (firebase.apps && firebase.apps.length > 0) {
+                  clearInterval(checkFirebase);
+                  resolve();
+                }
+              }
+
+              if (attempts >= maxAttempts) {
+                clearInterval(checkFirebase);
+                reject(new Error('Firebase initialization timeout'));
+              }
+            }, 100);
+          });
+
+          console.log('Firebase initialized successfully');
+
+          // Load quest database JSON
+          const response = await fetch('quest_dashboard.json');
+          questDatabase = await response.json();
+          console.log('Quest database loaded:', Object.keys(questDatabase).length, 'quests');
+
+          // Get reference to the quests node
+          const db = firebase.database();
+          const path = `users/${CONFIG.userId}/characters/${CONFIG.characterId}/quests`;
+          console.log('Fetching from path:', path);
+
+          const questsRef = db.ref(path);
+
+          // Fetch all scenes
+          console.log('Executing database query...');
+          const snapshot = await questsRef.once('value');
+          console.log('Snapshot received:', snapshot.exists());
+          const scenesData = snapshot.val();
+          console.log('Raw data:', scenesData);
+
+          if (!scenesData) {
+            console.log('No quest data found');
+            renderQuests([]);
+            return;
+          }
+
+          console.log('Scenes found:', Object.keys(scenesData));
+
+          // Loop through each scene and get completed quests
+          allCompletedQuests = [];
+
+          for (const sceneName in scenesData) {
+            const sceneData = scenesData[sceneName];
+
+            if (sceneData && sceneData.CompletedQuests) {
+              const completedQuests = sceneData.CompletedQuests;
+
+              for (const questId in completedQuests) {
+                // Look up quest in our database
+                if (questDatabase[questId]) {
+                  allCompletedQuests.push({
+                    questId: questId,
+                    sceneName: sceneName,
+                    data: questDatabase[questId]
+                  });
+                } else {
+                  console.warn(`Quest not found in database: ${questId}`);
+                }
+              }
+            }
+          }
+
+          console.log('Total completed quests:', allCompletedQuests.length);
+          renderQuests(allCompletedQuests);
+
+        } catch (error) {
+          console.error('Error loading data:', error);
+          document.getElementById('questEntries').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">⚠️</div>
+              <h3>Error Loading Data</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Filter chip functionality
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+          this.classList.add('active');
+          filterQuests(this.textContent);
+        });
+      });
+
+      // Start initialization
+      init();
+    </script>
+  </body>
+</html>

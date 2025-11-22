@@ -1,0 +1,106 @@
+{
+  "FarmerJoeQuest1": {
+    "whatPlayerDid": "Helped Farmer Joe by assisting customers on the farm.",
+    "whyItMatters": "Teaches responsibility, following instructions, and community support.",
+    "subject": "General Skills",
+    "subjectMatter": "Responsibility",
+    "gradeLevel": "K-1",
+    "points": 5
+  },
+  "CustomerMagarQuest1": {
+    "whatPlayerDid": "Counted 20 ripe tomatoes.",
+    "whyItMatters": "Builds basic counting and observation skills.",
+    "subject": "Math",
+    "subjectMatter": "Counting",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "CustomerKrishnaQuest1": {
+    "whatPlayerDid": "Confirmed existence of blue tomatoes.",
+    "whyItMatters": "Encourages curiosity, verification, and information seeking.",
+    "subject": "Science, Math",
+    "subjectMatter": "Observation",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "CustomerKrishnaQuest2": {
+    "whatPlayerDid": "Counted 5 blue tomatoes.",
+    "whyItMatters": "Strengthens counting and inventory skills.",
+    "subject": "Math",
+    "subjectMatter": "Counting",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "CustomerRobQuest1": {
+    "whatPlayerDid": "Confirmed there are 8 red tomatoes.",
+    "whyItMatters": "Reinforces counting and categorizing objects.",
+    "subject": "Math",
+    "subjectMatter": "Counting",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "CustomerMagarQuest2": {
+    "whatPlayerDid": "Calculated remaining tomatoes (7) after sales.",
+    "whyItMatters": "Teaches subtraction and real?world inventory changes.",
+    "subject": "Math",
+    "subjectMatter": "Subtraction",
+    "gradeLevel": "Grade 2",
+    "points": 5
+  },
+  "HelperRockyQuest1": {
+    "whatPlayerDid": "Set a clock to 3:30.",
+    "whyItMatters": "Introduces reading/moving time on a clock.",
+    "subject": "Math",
+    "subjectMatter": "Time",
+    "gradeLevel": "Grade 2",
+    "points": 5
+  },
+  "HelperRockyQuest2": {
+    "whatPlayerDid": "Counted 11 bunnies.",
+    "whyItMatters": "Reinforces counting living objects and accuracy.",
+    "subject": "Math",
+    "subjectMatter": "Counting",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "HelperRockyQuest3": {
+    "whatPlayerDid": "Identified more brown bunnies (6 vs 5).",
+    "whyItMatters": "Teaches comparison and categorization.",
+    "subject": "Math",
+    "subjectMatter": "Comparison",
+    "gradeLevel": "Grade 1",
+    "points": 5
+  },
+  "HelperRockyQuest4": {
+    "whatPlayerDid": "Calculated difference (1 more brown).",
+    "whyItMatters": "Introduces subtraction and comparing quantities.",
+    "subject": "Math",
+    "subjectMatter": "Subtraction",
+    "gradeLevel": "Grade 2",
+    "points": 5
+  },
+  "FarmerAnyaQuest1": {
+    "whatPlayerDid": "Measured 5 horizontal patches.",
+    "whyItMatters": "Teaches measurement and tool usage.",
+    "subject": "Math",
+    "subjectMatter": "Measuring",
+    "gradeLevel": "Grade 2",
+    "points": 5
+  },
+  "FarmerAnyaQuest2": {
+    "whatPlayerDid": "Measured 3 vertical patches.",
+    "whyItMatters": "Reinforces measurement and spatial reasoning.",
+    "subject": "Math",
+    "subjectMatter": "Measuring",
+    "gradeLevel": "Grade 2",
+    "points": 5
+  },
+  "FarmerAnyaQuest3": {
+    "whatPlayerDid": "Verified 3×5 = 15 patches.",
+    "whyItMatters": "Introduces multiplication and area concepts.",
+    "subject": "Math",
+    "subjectMatter": "Multiplication",
+    "gradeLevel": "Grade 3",
+    "points": 5
+  }
+}
